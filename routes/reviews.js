@@ -4,14 +4,11 @@ const { getDB } = require('../config/database');
 
 const router = express.Router();
 
-// POST /api/reviews
-// Create a new review
 router.post('/', async (req, res) => {
   try {
     const db = getDB();
     const { user_id, movie_id, rating, review_text } = req.body;
 
-    // Validation
     if (!user_id || !movie_id || !rating) {
       return res.status(400).json({ 
         error: 'Missing required fields: user_id, movie_id, rating' 
@@ -27,19 +24,16 @@ router.post('/', async (req, res) => {
     const userId = new ObjectId(user_id);
     const movieId = new ObjectId(movie_id);
 
-    // Check if user exists
     const user = await db.collection('users').findOne({ _id: userId });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Check if movie exists
     const movie = await db.collection('movies').findOne({ _id: movieId });
     if (!movie) {
       return res.status(404).json({ error: 'Movie not found' });
     }
 
-    // Check if user already reviewed this movie
     const existingReview = await db.collection('reviews').findOne({
       user_id: userId,
       movie_id: movieId
@@ -52,7 +46,6 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Create review
     const review = {
       user_id: userId,
       movie_id: movieId,
@@ -77,8 +70,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/reviews/:id
-// Get a specific review
 router.get('/:id', async (req, res) => {
   try {
     const db = getDB();
@@ -103,12 +94,8 @@ router.get('/:id', async (req, res) => {
             as: 'movie'
           }
         },
-        {
-          $unwind: '$user'
-        },
-        {
-          $unwind: '$movie'
-        },
+        { $unwind: '$user' },
+        { $unwind: '$movie' },
         {
           $project: {
             _id: 1,
@@ -141,8 +128,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/reviews/:id
-// Delete a review (bonus endpoint)
 router.delete('/:id', async (req, res) => {
   try {
     const db = getDB();
