@@ -1,23 +1,14 @@
-/**
- * Movie Model
- * Represents a movie in the streaming platform
- */
 
 const { ObjectId } = require('mongodb');
 const { getDB } = require('../config/database');
 
 class Movie {
-  /**
-   * Get collection
-   */
+
   static getCollection() {
     const db = getDB();
     return db.collection('movies');
   }
 
-  /**
-   * Schema definition (for documentation)
-   */
   static schema = {
     _id: ObjectId,
     title: String,
@@ -25,13 +16,10 @@ class Movie {
     genres: [String],
     cast: [String],
     directors: [String],
-    rating: Number,        // 0-10 scale
-    watch_count: Number    // Total views
+    rating: Number,        
+    watch_count: Number    
   };
 
-  /**
-   * Validation rules
-   */
   static validate(movieData) {
     const errors = [];
 
@@ -71,9 +59,6 @@ class Movie {
     };
   }
 
-  /**
-   * Find movie by ID
-   */
   static async findById(id) {
     try {
       const collection = this.getCollection();
@@ -84,9 +69,6 @@ class Movie {
     }
   }
 
-  /**
-   * Find movies by criteria
-   */
   static async find(query = {}, options = {}) {
     try {
       const collection = this.getCollection();
@@ -105,9 +87,6 @@ class Movie {
     }
   }
 
-  /**
-   * Search movies (text search)
-   */
   static async search(searchText, options = {}) {
     try {
       const collection = this.getCollection();
@@ -123,10 +102,6 @@ class Movie {
       throw new Error(`Error searching movies: ${error.message}`);
     }
   }
-
-  /**
-   * Get top rated movies
-   */
   static async getTopRated(limit = 10) {
     try {
       const collection = this.getCollection();
@@ -143,9 +118,6 @@ class Movie {
     }
   }
 
-  /**
-   * Get movies by genre
-   */
   static async getByGenre(genre, options = {}) {
     try {
       const collection = this.getCollection();
@@ -163,9 +135,6 @@ class Movie {
     }
   }
 
-  /**
-   * Get movie count
-   */
   static async count(query = {}) {
     try {
       const collection = this.getCollection();
@@ -175,9 +144,6 @@ class Movie {
     }
   }
 
-  /**
-   * Create new movie (optional - for admin features)
-   */
   static async create(movieData) {
     try {
       const validation = this.validate(movieData);
@@ -198,9 +164,6 @@ class Movie {
     }
   }
 
-  /**
-   * Update movie
-   */
   static async update(id, updateData) {
     try {
       const collection = this.getCollection();
@@ -215,9 +178,7 @@ class Movie {
     }
   }
 
-  /**
-   * Increment watch count
-   */
+ 
   static async incrementWatchCount(id) {
     try {
       const collection = this.getCollection();
@@ -232,9 +193,6 @@ class Movie {
     }
   }
 
-  /**
-   * Delete movie (optional)
-   */
   static async delete(id) {
     try {
       const collection = this.getCollection();
@@ -245,5 +203,6 @@ class Movie {
     }
   }
 }
+
 
 module.exports = Movie;
