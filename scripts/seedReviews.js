@@ -1,6 +1,5 @@
 const { connectDB, closeDB } = require('../config/database');
 
-// Sample review templates
 const reviewTemplates = [
   "Amazing movie! Loved every minute of it.",
   "Great film with excellent performances.",
@@ -24,16 +23,13 @@ const reviewTemplates = [
   "A timeless classic. Simply amazing."
 ];
 
-// Generate random rating (1-10)
 function randomRating() {
-  // Bias towards higher ratings (more realistic)
   const rand = Math.random();
-  if (rand < 0.4) return Math.floor(Math.random() * 3) + 8; // 8-10 (40%)
-  if (rand < 0.7) return Math.floor(Math.random() * 2) + 6; // 6-7 (30%)
-  return Math.floor(Math.random() * 5) + 1; // 1-5 (30%)
+  if (rand < 0.4) return Math.floor(Math.random() * 3) + 8;
+  if (rand < 0.7) return Math.floor(Math.random() * 2) + 6;
+  return Math.floor(Math.random() * 5) + 1;
 }
 
-// Generate random date within last N days
 function randomDateWithinDays(days) {
   const now = new Date();
   const pastDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
@@ -43,66 +39,55 @@ function randomDateWithinDays(days) {
 
 async function seedReviews() {
   try {
-    console.log('🌱 Seeding reviews...');
     const db = await connectDB();
-    
-    // Get all users and movies
     const users = await db.collection('users').find({}).toArray();
     const movies = await db.collection('movies').find({}).limit(100).toArray();
-    
+
     if (users.length === 0) {
-      console.log('⚠️  No users found. Please run seedUsers.js first!');
+      console.log('No users found. Please run seedUsers.js first.');
       return;
     }
-    
+
     if (movies.length === 0) {
-      console.log('⚠️  No movies found. Please import movies first!');
+      console.log('No movies found. Please import movies first.');
       return;
     }
-    
-    console.log(`📊 Found ${users.length} users and ${movies.length} movies`);
-    
-    // Clear existing reviews
+
     await db.collection('reviews').deleteMany({});
-    console.log('✅ Cleared existing reviews');
-    
-    // Generate reviews (each user reviews 3-8 random movies)
+
     const reviews = [];
-    
+
     for (const user of users) {
-      const numReviews = Math.floor(Math.random() * 6) + 3; // 3-8 reviews
+      const numReviews = Math.floor(Math.random() * 6) + 3;
       const reviewedMovies = new Set();
-      
+
       for (let i = 0; i < numReviews; i++) {
-        // Pick a random movie (avoid duplicates for same user)
         let randomMovie;
         let attempts = 0;
         do {
           randomMovie = movies[Math.floor(Math.random() * movies.length)];
           attempts++;
         } while (reviewedMovies.has(randomMovie._id.toString()) && attempts < 10);
-        
-        if (attempts >= 10) break; // Avoid infinite loop
-        
+
+        if (attempts >= 10) break;
+
         reviewedMovies.add(randomMovie._id.toString());
-        
+
         const randomReview = reviewTemplates[Math.floor(Math.random() * reviewTemplates.length)];
-        
+
         reviews.push({
           user_id: user._id,
           movie_id: randomMovie._id,
           rating: randomRating(),
           review_text: randomReview,
-          created_at: randomDateWithinDays(90) // Last 90 days
+          created_at: randomDateWithinDays(90)
         });
       }
     }
-    
-    // Insert reviews
+
     const result = await db.collection('reviews').insertMany(reviews);
-    console.log(`✅ Inserted ${result.insertedCount} reviews`);
-    
-    // Show statistics
+    console.log(`Inserted ${result.insertedCount} reviews`);
+
     const stats = await db.collection('reviews')
       .aggregate([
         {
@@ -116,16 +101,15 @@ async function seedReviews() {
         }
       ])
       .toArray();
-    
+
     if (stats.length > 0) {
-      console.log('\n📊 Review Statistics:');
-      console.log(`   - Total reviews: ${stats[0].total_reviews}`);
-      console.log(`   - Average rating: ${stats[0].avg_rating.toFixed(2)}`);
-      console.log(`   - Unique reviewers: ${stats[0].unique_users.length}`);
-      console.log(`   - Unique movies reviewed: ${stats[0].unique_movies.length}`);
+      console.log('Review Statistics:');
+      console.log(`- Total reviews: ${stats[0].total_reviews}`);
+      console.log(`- Average rating: ${stats[0].avg_rating.toFixed(2)}`);
+      console.log(`- Unique reviewers: ${stats[0].unique_users.length}`);
+      console.log(`- Unique movies reviewed: ${stats[0].unique_movies.length}`);
     }
-    
-    // Show top rated movies
+
     const topRated = await db.collection('reviews')
       .aggregate([
         {
@@ -135,15 +119,9 @@ async function seedReviews() {
             review_count: { $sum: 1 }
           }
         },
-        {
-          $match: { review_count: { $gte: 2 } }
-        },
-        {
-          $sort: { avg_rating: -1 }
-        },
-        {
-          $limit: 5
-        },
+        { $match: { review_count: { $gte: 2 } } },
+        { $sort: { avg_rating: -1 } },
+        { $limit: 5 },
         {
           $lookup: {
             from: 'movies',
@@ -152,29 +130,25 @@ async function seedReviews() {
             as: 'movie'
           }
         },
-        {
-          $unwind: '$movie'
-        }
+        { $unwind: '$movie' }
       ])
       .toArray();
-    
+
     if (topRated.length > 0) {
-      console.log('\n⭐ Top Rated Movies (with 2+ reviews):');
+      console.log('Top Rated Movies (with 2+ reviews):');
       topRated.forEach((item, index) => {
-        console.log(`   ${index + 1}. ${item.movie.title} - ${item.avg_rating.toFixed(1)}/10 (${item.review_count} reviews)`);
+        console.log(`${index + 1}. ${item.movie.title} - ${item.avg_rating.toFixed(1)}/10 (${item.review_count} reviews)`);
       });
     }
-    
-    console.log('\n✨ Review seeding completed!');
-    
+
+    console.log('Review seeding completed.');
   } catch (error) {
-    console.error('❌ Error seeding reviews:', error);
+    console.error('Error seeding reviews:', error);
   } finally {
     await closeDB();
   }
 }
 
-// Run if called directly
 if (require.main === module) {
   seedReviews();
 }
