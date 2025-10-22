@@ -5,7 +5,6 @@ const { calculateHybridScore, calculateSimilarity } = require('../utils/searchRa
 
 const router = express.Router();
 
-// ✅ IMPROVED FUZZY SEARCH (handles typos like "The Great Tran Robber")
 router.get('/search', async (req, res) => {
   try {
     const db = getDB();
@@ -15,7 +14,6 @@ router.get('/search', async (req, res) => {
       return res.status(400).json({ error: 'Query parameter is required' });
     }
 
-    // Fetch all movies (only required fields for efficiency)
     const movies = await db.collection('movies')
       .find({}, {
         projection: {
@@ -30,18 +28,14 @@ router.get('/search', async (req, res) => {
       })
       .toArray();
 
-    // Compute fuzzy similarity and hybrid score
     const rankedMovies = movies
       .map(movie => {
         const sim = calculateSimilarity(query, movie.title || '');
         const hybrid = calculateHybridScore(movie, query);
         return { ...movie, similarity: sim, hybrid_score: hybrid };
       })
-      // Keep only reasonable matches (ignore completely different names)
       .filter(m => m.similarity > 0.4)
-      // Sort by hybrid score (desc)
       .sort((a, b) => b.hybrid_score - a.hybrid_score)
-      // Limit final output
       .slice(0, parseInt(limit));
 
     res.json({
@@ -67,8 +61,6 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// GET /api/movies/top-watched?days=30&limit=5
-// Top watched movies in last N days
 router.get('/top-watched', async (req, res) => {
   try {
     const db = getDB();
@@ -135,8 +127,6 @@ router.get('/top-watched', async (req, res) => {
   }
 });
 
-// GET /api/movies/:id
-// Get movie details
 router.get('/:id', async (req, res) => {
   try {
     const db = getDB();
@@ -148,7 +138,6 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Movie not found' });
     }
 
-    // Get review stats
     const reviewStats = await db.collection('reviews')
       .aggregate([
         { $match: { movie_id: movieId } },
@@ -178,8 +167,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// GET /api/movies/:id/reviews
-// Get all reviews for a movie
 router.get('/:id/reviews', async (req, res) => {
   try {
     const db = getDB();
@@ -229,3 +216,4 @@ router.get('/:id/reviews', async (req, res) => {
 });
 
 module.exports = router;
+
