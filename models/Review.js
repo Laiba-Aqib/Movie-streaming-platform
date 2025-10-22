@@ -1,23 +1,15 @@
-/**
- * Review Model
- * Represents a user review for a movie
- */
 
 const { ObjectId } = require('mongodb');
 const { getDB } = require('../config/database');
 
 class Review {
-  /**
-   * Get collection
-   */
+
   static getCollection() {
     const db = getDB();
     return db.collection('reviews');
   }
 
-  /**
-   * Schema definition (for documentation)
-   */
+
   static schema = {
     _id: ObjectId,
     user_id: ObjectId,        // Reference to users collection
@@ -27,9 +19,6 @@ class Review {
     created_at: Date
   };
 
-  /**
-   * Validation rules
-   */
   static validate(reviewData) {
     const errors = [];
 
@@ -61,9 +50,6 @@ class Review {
     };
   }
 
-  /**
-   * Create a review
-   */
   static async create(reviewData) {
     try {
       const validation = this.validate(reviewData);
@@ -73,7 +59,7 @@ class Review {
 
       const db = getDB();
       
-      // Verify user exists
+      // Verifying if user exists
       const user = await db.collection('users').findOne({ 
         _id: new ObjectId(reviewData.user_id) 
       });
@@ -81,7 +67,7 @@ class Review {
         throw new Error('User not found');
       }
 
-      // Verify movie exists
+      // Verifying if movie exists
       const movie = await db.collection('movies').findOne({ 
         _id: new ObjectId(reviewData.movie_id) 
       });
@@ -89,7 +75,7 @@ class Review {
         throw new Error('Movie not found');
       }
 
-      // Check if user already reviewed this movie
+      // Checking if user already reviewed this movie
       const existingReview = await this.getCollection().findOne({
         user_id: new ObjectId(reviewData.user_id),
         movie_id: new ObjectId(reviewData.movie_id)
@@ -114,9 +100,6 @@ class Review {
     }
   }
 
-  /**
-   * Find review by ID
-   */
   static async findById(id) {
     try {
       const collection = this.getCollection();
@@ -151,9 +134,6 @@ class Review {
     }
   }
 
-  /**
-   * Get reviews by movie ID
-   */
   static async getByMovieId(movieId, options = {}) {
     try {
       const collection = this.getCollection();
@@ -195,9 +175,6 @@ class Review {
     }
   }
 
-  /**
-   * Get reviews by user ID
-   */
   static async getByUserId(userId, options = {}) {
     try {
       const collection = this.getCollection();
@@ -240,9 +217,6 @@ class Review {
     }
   }
 
-  /**
-   * Get movie rating statistics
-   */
   static async getMovieStats(movieId) {
     try {
       const collection = this.getCollection();
@@ -282,9 +256,6 @@ class Review {
     }
   }
 
-  /**
-   * Get top rated movies
-   */
   static async getTopRatedMovies(limit = 10, minReviews = 3) {
     try {
       const collection = this.getCollection();
@@ -340,9 +311,6 @@ class Review {
     }
   }
 
-  /**
-   * Get recent reviews
-   */
   static async getRecent(limit = 10) {
     try {
       const collection = this.getCollection();
@@ -394,9 +362,6 @@ class Review {
     }
   }
 
-  /**
-   * Update review
-   */
   static async update(id, updateData) {
     try {
       // Validate rating if provided
@@ -428,9 +393,6 @@ class Review {
     }
   }
 
-  /**
-   * Delete review
-   */
   static async delete(id) {
     try {
       const collection = this.getCollection();
@@ -441,9 +403,6 @@ class Review {
     }
   }
 
-  /**
-   * Check if user has reviewed a movie
-   */
   static async hasReviewed(userId, movieId) {
     try {
       const collection = this.getCollection();
@@ -458,9 +417,6 @@ class Review {
     }
   }
 
-  /**
-   * Get review count for a movie
-   */
   static async getMovieReviewCount(movieId) {
     try {
       const collection = this.getCollection();
@@ -474,9 +430,7 @@ class Review {
     }
   }
 
-  /**
-   * Delete all reviews by user
-   */
+ 
   static async deleteByUser(userId) {
     try {
       const collection = this.getCollection();
@@ -489,9 +443,7 @@ class Review {
     }
   }
 
-  /**
-   * Delete all reviews for a movie
-   */
+ 
   static async deleteByMovie(movieId) {
     try {
       const collection = this.getCollection();
@@ -504,5 +456,6 @@ class Review {
     }
   }
 }
+
 
 module.exports = Review;
