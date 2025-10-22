@@ -65,34 +65,28 @@ const sampleUsers = [
 
 async function seedUsers() {
   try {
-    console.log('🌱 Seeding users...');
     const db = await connectDB();
-    
-    // Clear existing users
+
     await db.collection('users').deleteMany({});
-    console.log('✅ Cleared existing users');
-    
-    // Insert new users
+    console.log('Cleared existing users');
+
     const result = await db.collection('users').insertMany(sampleUsers);
-    console.log(`✅ Inserted ${result.insertedCount} users`);
-    
-    // Display inserted users
+    console.log(`Inserted ${result.insertedCount} users`);
+
     const users = await db.collection('users').find({}).toArray();
-    console.log('\n📋 Sample Users:');
+    console.log('Sample Users:');
     users.forEach(user => {
-      console.log(`   - ${user.name} (${user.subscription_type}) - ID: ${user._id}`);
+      console.log(`- ${user.name} (${user.subscription_type}) - ID: ${user._id}`);
     });
-    
-    console.log('\n✨ User seeding completed!');
-    
+
+    console.log('User seeding completed.');
   } catch (error) {
-    console.error('❌ Error seeding users:', error);
+    console.error('Error seeding users:', error);
   } finally {
     await closeDB();
   }
 }
 
-// Run if called directly
 if (require.main === module) {
   seedUsers();
 }
