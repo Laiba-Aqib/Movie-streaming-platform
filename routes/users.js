@@ -4,35 +4,23 @@ const { getDB } = require('../config/database');
 
 const router = express.Router();
 
-// GET /api/users/:id/history?limit=20&skip=0
-// Get user's watch history
 router.get('/:id/history', async (req, res) => {
   try {
     const db = getDB();
     const userId = new ObjectId(req.params.id);
     const { limit = 20, skip = 0 } = req.query;
 
-    // Check if user exists
     const user = await db.collection('users').findOne({ _id: userId });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Get watch history with movie details
     const history = await db.collection('watch_history')
       .aggregate([
-        {
-          $match: { user_id: userId }
-        },
-        {
-          $sort: { watched_at: -1 }
-        },
-        {
-          $skip: parseInt(skip)
-        },
-        {
-          $limit: parseInt(limit)
-        },
+        { $match: { user_id: userId } },
+        { $sort: { watched_at: -1 } },
+        { $skip: parseInt(skip) },
+        { $limit: parseInt(limit) },
         {
           $lookup: {
             from: 'movies',
@@ -41,9 +29,7 @@ router.get('/:id/history', async (req, res) => {
             as: 'movie'
           }
         },
-        {
-          $unwind: '$movie'
-        },
+        { $unwind: '$movie' },
         {
           $project: {
             _id: 1,
@@ -61,7 +47,6 @@ router.get('/:id/history', async (req, res) => {
       ])
       .toArray();
 
-    // Get statistics
     const stats = await db.collection('watch_history')
       .aggregate([
         { $match: { user_id: userId } },
@@ -103,8 +88,6 @@ router.get('/:id/history', async (req, res) => {
   }
 });
 
-// GET /api/users/:id
-// Get user profile
 router.get('/:id', async (req, res) => {
   try {
     const db = getDB();
@@ -116,7 +99,6 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Get user stats
     const watchCount = await db.collection('watch_history').countDocuments({ user_id: userId });
     const reviewCount = await db.collection('reviews').countDocuments({ user_id: userId });
 
@@ -134,8 +116,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// GET /api/users
-// Get all users (for testing)
 router.get('/', async (req, res) => {
   try {
     const db = getDB();
