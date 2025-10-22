@@ -12,9 +12,9 @@ class Review {
 
   static schema = {
     _id: ObjectId,
-    user_id: ObjectId,        // Reference to users collection
-    movie_id: ObjectId,       // Reference to movies collection
-    rating: Number,           // 1-10 scale
+    user_id: ObjectId,        
+    movie_id: ObjectId,       
+    rating: Number,           
     review_text: String,
     created_at: Date
   };
@@ -459,3 +459,4 @@ class Review {
 
 
 module.exports = Review;
+
