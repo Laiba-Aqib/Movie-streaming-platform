@@ -17,10 +17,10 @@ async function connectDB() {
     await client.connect();
     db = client.db(dbName);
     
-    console.log(`✅ Connected to MongoDB: ${dbName}`);
+    console.log(`Connected to MongoDB: ${dbName}`);
     return db;
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
+    console.error(' MongoDB connection error:', error);
     process.exit(1);
   }
 }
@@ -43,4 +43,5 @@ module.exports = {
   connectDB,
   getDB,
   closeDB
+
 };
