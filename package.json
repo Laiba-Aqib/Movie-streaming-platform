@@ -1,0 +1,28 @@
+{
+  "name": "movie-streaming-backend",
+  "version": "1.0.0",
+  "description": "Movie Streaming Platform Backend API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "seed:users": "node scripts/seedUsers.js",
+    "seed:history": "node scripts/seedWatchHistory.js",
+    "seed:reviews": "node scripts/seedReviews.js",
+    "seed:all": "npm run seed:users && npm run seed:history && npm run seed:reviews",
+    "indexes": "node scripts/createIndexes.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "fuzzball": "^2.2.3",
+    "mongodb": "^6.20.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
