@@ -1,39 +1,25 @@
-/**
- * User Model
- * Represents a user in the streaming platform
- */
 
 const { ObjectId } = require('mongodb');
 const { getDB } = require('../config/database');
 
 class User {
-  /**
-   * Get collection
-   */
+
   static getCollection() {
     const db = getDB();
     return db.collection('users');
   }
 
-  /**
-   * Schema definition (for documentation)
-   */
+
   static schema = {
     _id: ObjectId,
     name: String,
-    email: String,              // Unique
-    subscription_type: String,  // "basic", "premium", "vip"
+    email: String,              
+    subscription_type: String,  
     created_at: Date
   };
-
-  /**
-   * Valid subscription types
-   */
   static subscriptionTypes = ['basic', 'premium', 'vip'];
 
-  /**
-   * Validation rules
-   */
+  
   static validate(userData) {
     const errors = [];
 
@@ -63,9 +49,6 @@ class User {
     };
   }
 
-  /**
-   * Find user by ID
-   */
   static async findById(id) {
     try {
       const collection = this.getCollection();
@@ -76,9 +59,6 @@ class User {
     }
   }
 
-  /**
-   * Find user by email
-   */
   static async findByEmail(email) {
     try {
       const collection = this.getCollection();
@@ -88,10 +68,7 @@ class User {
       throw new Error(`Error finding user by email: ${error.message}`);
     }
   }
-
-  /**
-   * Find users by criteria
-   */
+  
   static async find(query = {}, options = {}) {
     try {
       const collection = this.getCollection();
@@ -110,9 +87,6 @@ class User {
     }
   }
 
-  /**
-   * Get users by subscription type
-   */
   static async getBySubscription(subscriptionType) {
     try {
       if (!this.subscriptionTypes.includes(subscriptionType)) {
@@ -129,10 +103,7 @@ class User {
       throw new Error(`Error getting users by subscription: ${error.message}`);
     }
   }
-
-  /**
-   * Get user count
-   */
+  
   static async count(query = {}) {
     try {
       const collection = this.getCollection();
@@ -141,10 +112,7 @@ class User {
       throw new Error(`Error counting users: ${error.message}`);
     }
   }
-
-  /**
-   * Create new user
-   */
+  
   static async create(userData) {
     try {
       const validation = this.validate(userData);
@@ -170,18 +138,14 @@ class User {
       throw new Error(`Error creating user: ${error.message}`);
     }
   }
-
-  /**
-   * Update user
-   */
   static async update(id, updateData) {
     try {
-      // Don't allow email updates to avoid uniqueness issues
+      // Don't allowing email updates to avoid uniqueness issues
       if (updateData.email) {
         delete updateData.email;
       }
 
-      // Validate subscription type if provided
+      // Validating subscription type if provided
       if (updateData.subscription_type && !this.subscriptionTypes.includes(updateData.subscription_type)) {
         throw new Error('Invalid subscription type');
       }
@@ -198,9 +162,6 @@ class User {
     }
   }
 
-  /**
-   * Update subscription
-   */
   static async updateSubscription(id, subscriptionType) {
     try {
       if (!this.subscriptionTypes.includes(subscriptionType)) {
@@ -218,10 +179,6 @@ class User {
       throw new Error(`Error updating subscription: ${error.message}`);
     }
   }
-
-  /**
-   * Delete user
-   */
   static async delete(id) {
     try {
       const collection = this.getCollection();
@@ -232,9 +189,6 @@ class User {
     }
   }
 
-  /**
-   * Get user statistics
-   */
   static async getStatistics(userId) {
     try {
       const db = getDB();
@@ -274,5 +228,6 @@ class User {
     }
   }
 }
+
 
 module.exports = User;
