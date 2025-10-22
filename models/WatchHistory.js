@@ -1,34 +1,22 @@
-/**
- * WatchHistory Model
- * Represents a user's watch history record
- */
 
 const { ObjectId } = require('mongodb');
 const { getDB } = require('../config/database');
 
 class WatchHistory {
-  /**
-   * Get collection
-   */
+
   static getCollection() {
     const db = getDB();
     return db.collection('watch_history');
   }
 
-  /**
-   * Schema definition (for documentation)
-   */
   static schema = {
     _id: ObjectId,
-    user_id: ObjectId,        // Reference to users collection
-    movie_id: ObjectId,       // Reference to movies collection
+    user_id: ObjectId,        
+    movie_id: ObjectId,       
     watched_at: Date,
-    watch_duration: Number    // Duration in minutes
+    watch_duration: Number    
   };
 
-  /**
-   * Validation rules
-   */
   static validate(watchData) {
     const errors = [];
 
@@ -55,9 +43,6 @@ class WatchHistory {
     };
   }
 
-  /**
-   * Create watch history record
-   */
   static async create(watchData) {
     try {
       const validation = this.validate(watchData);
@@ -65,7 +50,7 @@ class WatchHistory {
         throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
       }
 
-      // Verify user exists
+      // Verifying if user exists
       const db = getDB();
       const user = await db.collection('users').findOne({ 
         _id: new ObjectId(watchData.user_id) 
@@ -90,7 +75,7 @@ class WatchHistory {
         watch_duration: watchData.watch_duration || 0
       });
 
-      // Optionally increment movie watch count
+      // Optionally incrementing movie watch count
       await db.collection('movies').updateOne(
         { _id: new ObjectId(watchData.movie_id) },
         { $inc: { watch_count: 1 } }
@@ -102,9 +87,6 @@ class WatchHistory {
     }
   }
 
-  /**
-   * Get watch history by user ID
-   */
   static async getByUserId(userId, options = {}) {
     try {
       const collection = this.getCollection();
@@ -143,10 +125,6 @@ class WatchHistory {
       throw new Error(`Error getting watch history: ${error.message}`);
     }
   }
-
-  /**
-   * Get watch history by movie ID
-   */
   static async getByMovieId(movieId, options = {}) {
     try {
       const collection = this.getCollection();
@@ -165,9 +143,6 @@ class WatchHistory {
     }
   }
 
-  /**
-   * Get user watch statistics
-   */
   static async getUserStats(userId) {
     try {
       const collection = this.getCollection();
@@ -206,9 +181,6 @@ class WatchHistory {
     }
   }
 
-  /**
-   * Get top watched movies in time period
-   */
   static async getTopWatched(days = 30, limit = 5) {
     try {
       const collection = this.getCollection();
@@ -255,9 +227,6 @@ class WatchHistory {
     }
   }
 
-  /**
-   * Get recently watched movies by user
-   */
   static async getRecentByUser(userId, limit = 5) {
     try {
       const collection = this.getCollection();
@@ -293,9 +262,7 @@ class WatchHistory {
     }
   }
 
-  /**
-   * Check if user has watched a movie
-   */
+
   static async hasWatched(userId, movieId) {
     try {
       const collection = this.getCollection();
@@ -309,10 +276,6 @@ class WatchHistory {
       throw new Error(`Error checking watch status: ${error.message}`);
     }
   }
-
-  /**
-   * Get watch count for a movie
-   */
   static async getMovieWatchCount(movieId) {
     try {
       const collection = this.getCollection();
@@ -326,9 +289,7 @@ class WatchHistory {
     }
   }
 
-  /**
-   * Delete watch history record
-   */
+
   static async delete(id) {
     try {
       const collection = this.getCollection();
@@ -339,9 +300,6 @@ class WatchHistory {
     }
   }
 
-  /**
-   * Delete all watch history for a user
-   */
   static async deleteByUser(userId) {
     try {
       const collection = this.getCollection();
@@ -354,5 +312,6 @@ class WatchHistory {
     }
   }
 }
+
 
 module.exports = WatchHistory;
